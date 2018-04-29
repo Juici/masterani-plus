@@ -1,5 +1,5 @@
 // load modules
-require('anime-info');
+require('./anime-info');
 
 // finished loading
 const info = GM_info.script;
