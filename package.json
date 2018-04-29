@@ -1,0 +1,35 @@
+{
+  "name": "masterani-plus",
+  "version": "0.1.0",
+  "description": "Gulp build system for Masterani+",
+  "scripts": {
+    "test": "gulp test",
+    "clean": "gulp clean",
+    "build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Juici/ma-plus.git"
+  },
+  "keywords": [
+    "anime"
+  ],
+  "author": "Juici",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Juici/ma-plus/issues"
+  },
+  "homepage": "https://github.com/Juici/ma-plus#readme",
+  "devDependencies": {
+    "browserify": "^16.2.0",
+    "del": "^3.0.0",
+    "eslint": "^4.19.1",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-beautify": "^2.0.1",
+    "gulp-eslint": "^4.0.2",
+    "gulp-header": "^2.0.5",
+    "make-dir": "^1.2.0",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  }
+}
