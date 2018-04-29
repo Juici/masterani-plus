@@ -20,7 +20,7 @@ const beautifyOpts = {
     'end_with_newline': true,
     'indent_level': 0,
     'preserve_newlines': true,
-    'max_preserve_newlines': 1,
+    'max_preserve_newlines': 2,
     'space_in_paren': false,
     'space_in_empty_paren': false,
     'jslint_happy': false,
