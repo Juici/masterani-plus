@@ -10,6 +10,7 @@ const buffer = require('vinyl-buffer');
 const header = require('gulp-header');
 const beautify = require('gulp-beautify');
 
+const meta = require('./meta')(require('../../src/meta'));
 const prelude = fs.readFileSync(paths.src.prelude, 'utf8').trim();
 
 const beautifyOpts = {
@@ -36,7 +37,7 @@ const beautifyOpts = {
     'operator_position': 'before-newline',
 };
 
-function js() {
+function userJs() {
     const b = browserify({
         entries: paths.src.entry,
         paths: [paths.src.main],
@@ -44,11 +45,17 @@ function js() {
     });
 
     return b.bundle()
-        .pipe(source(path.basename(paths.dest.file)))
+        .pipe(source(path.basename(paths.dest.userJs)))
         .pipe(buffer())
         .pipe(beautify(beautifyOpts))
-        .pipe(header(fs.readFileSync(paths.src.header, 'utf8') + '\n'))
+        .pipe(header(meta + '\n'))
         .pipe(gulp.dest(paths.dest.dir));
 }
 
-module.exports = js;
+function metaJs(done) {
+    return fs.writeFile(paths.dest.metaJs, meta, 'utf8', done);
+}
+
+const index = gulp.parallel(userJs, metaJs);
+
+module.exports = index;

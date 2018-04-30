@@ -6,20 +6,21 @@ const paths = {
     src: {
         dir: './src',
         prelude: './src/prelude.js',
-        header: './src/header.js',
+        header: './src/meta.js',
         main: './src/main',
         entry: './src/main/loader.js',
     },
     dest: {
         dir: './dist',
-        file: './dist/ma-plus.user.js',
+        metaJs: './dist/ma-plus.meta.js',
+        userJs: './dist/ma-plus.user.js',
     },
 };
 global.paths = paths;
 
 const { lint, test } = require('./tasks/test');
 const clean = require('./tasks/clean');
-const js = require('./tasks/js');
+const js = require('./tasks/compile/index');
 
 exports.lint = lint;
 exports.test = test;
