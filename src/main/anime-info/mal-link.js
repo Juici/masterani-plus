@@ -4,7 +4,6 @@ const info = require('./info');
 const search = `https://api.jikan.moe/search/anime/${global.encodeURIComponent(info.anime.title)}`;
 
 function addLink(url) {
-    // const details = global.document.getElementById('details');
     const sections = global.document.querySelector('.ui.sections.list');
 
     const link = global.document.createElement('a');
