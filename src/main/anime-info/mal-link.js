@@ -16,17 +16,30 @@ function addLink(url) {
     });
 }
 
-http.request({
-    url: search,
-    method: 'GET',
-    timeout: 5000,
-}).then(res => {
-    let result = JSON.parse(res.responseText);
-    result = result.result[0];
+function requestLink() {
+    return http.request({
+        url: search,
+        method: 'GET',
+        timeout: 5000,
+    }).then(res => new Promise((resolve, reject) => {
+        let result = JSON.parse(res.responseText);
 
+        if (result.result && result.result[0]) {
+            result = result.result[0];
+
+            if (result.url) {
+                resolve(result.url);
+            }
+        }
+
+        reject();
+    }));
+}
+
+requestLink().then(url => {
     if (document.readyState !== 'loading') {
-        addLink(result.url);
+        addLink(url);
     } else {
-        document.addEventListener('DOMContentLoaded', () => addLink(result.url));
+        document.addEventListener('DOMContentLoaded', () => addLink(url));
     }
 });
