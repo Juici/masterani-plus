@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.3.0
+// @version      0.3.1
 // @author       Juici
 // @description  Enhancements and additions to Masterani
 // @homepageURL  https://github.com/Juici/masterani-plus
@@ -108,18 +108,31 @@
             });
         }
 
-        http.request({
-            url: search,
-            method: 'GET',
-            timeout: 5000,
-        }).then(res => {
-            let result = JSON.parse(res.responseText);
-            result = result.result[0];
+        function requestLink() {
+            return http.request({
+                url: search,
+                method: 'GET',
+                timeout: 5000,
+            }).then(res => new Promise((resolve, reject) => {
+                let result = JSON.parse(res.responseText);
 
+                if (result.result && result.result[0]) {
+                    result = result.result[0];
+
+                    if (result.url) {
+                        resolve(result.url);
+                    }
+                }
+
+                reject();
+            }));
+        }
+
+        requestLink().then(url => {
             if (document.readyState !== 'loading') {
-                addLink(result.url);
+                addLink(url);
             } else {
-                document.addEventListener('DOMContentLoaded', () => addLink(result.url));
+                document.addEventListener('DOMContentLoaded', () => addLink(url));
             }
         });
 
@@ -177,11 +190,16 @@
 
     }, { "./anime-info": 1 }],
     6: [function (require, module, exports) {
-        // Internal
+        const query = require('./query');
 
-        /**
-         * A pending query with callback.
-         */
+        function q(selector) {
+            return query(selector);
+        }
+
+        exports.q = q;
+
+    }, { "./query": 7 }],
+    7: [function (require, module, exports) {
         class PendingQuery {
             constructor(query, resolve) {
                 this.query = query;
@@ -189,9 +207,6 @@
             }
         }
 
-        /**
-         * A global MutationObserver to resolve pending queries.
-         */
         class Observer {
             constructor() {
                 this._config = {
@@ -199,25 +214,25 @@
                     childList: true,
                     subtree: true,
                 };
-                this._queries = [];
+                this._pending = [];
                 this._observer = new MutationObserver(mutations => this._observe(mutations));
                 this._running = false;
             }
 
             _observe(mutations) {
                 for (let mut of mutations) {
-                    let i = this._queries.length;
+                    let i = this._pending.length;
                     while (i--) {
-                        let pending = this._queries[i];
+                        let query = this._pending[i];
 
-                        if (mut.type === 'attributes' && mut.target.matches(pending.query)) {
-                            this._queries.slice(i, 1);
-                            pending.resolve(mut.target);
+                        if (mut.type === 'attributes' && mut.target.matches(query.query)) {
+                            this._pending.slice(i, 1);
+                            query.resolve(mut.target);
                         } else if (mut.type === 'childList') {
-                            const el = mut.target.querySelector(pending.query);
+                            const el = mut.target.querySelector(query.query);
                             if (el != null) {
-                                this._queries.slice(i, 1);
-                                pending.resolve(el);
+                                this._pending.slice(i, 1);
+                                query.resolve(el);
                             }
                         }
                     }
@@ -241,28 +256,26 @@
             }
 
             add(pending) {
-                this._queries.push(pending);
+                this._pending.push(pending);
             }
         }
 
-        const observer = new Observer();
-        observer.start();
-
-        // External
-
-        function q(query) {
+        function query(selector) {
             return new Promise(resolve => {
-                let el = document.querySelector(query);
+                let el = document.querySelector(selector);
                 if (el != null) {
                     resolve(el);
                 } else {
-                    const pending = new PendingQuery(query, resolve);
+                    const pending = new PendingQuery(selector, resolve);
                     observer.add(pending);
                 }
             });
         }
 
-        exports.q = q;
+        const observer = new Observer();
+        observer.start();
+
+        module.exports = query;
 
     }, {}]
 }, {}, [5]);
