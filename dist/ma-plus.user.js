@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.3.1
+// @version      0.3.2
 // @author       Juici
 // @description  Enhancements and additions to Masterani
 // @homepageURL  https://github.com/Juici/masterani-plus
@@ -10,6 +10,7 @@
 // @supportURL   https://github.com/Juici/masterani-plus
 // @include      /^https?:\/\/www\.masterani\.me\/.*/
 // @connect      api.jikan.moe
+// @connect      myanimelist.net
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
@@ -94,7 +95,8 @@
         const info = require('./info');
         const _ = require('../util');
 
-        const search = `https://api.jikan.moe/search/anime/${encodeURIComponent(info.anime.title)}`;
+        const search = `https://myanimelist.net/anime.php?q=${encodeURIComponent(info.anime.title)}`;
+        const findUrl = /<a[^>]*?class="[^"]*?\bhoverinfo_trigger\b[^"]*?"[^>]*?href="([^"]*?)"[^>]*?>/i;
 
         function addLink(url) {
             _.q('.ui.sections.list').then(sections => {
@@ -114,17 +116,14 @@
                 method: 'GET',
                 timeout: 5000,
             }).then(res => new Promise((resolve, reject) => {
-                let result = JSON.parse(res.responseText);
+                const page = res.responseText;
+                const match = findUrl.exec(page);
 
-                if (result.result && result.result[0]) {
-                    result = result.result[0];
-
-                    if (result.url) {
-                        resolve(result.url);
-                    }
+                if (match) {
+                    resolve(match[1]);
+                } else {
+                    reject();
                 }
-
-                reject();
             }));
         }
 
@@ -192,6 +191,12 @@
     6: [function (require, module, exports) {
         const query = require('./query');
 
+        /**
+         * Query the document with the given selector.
+         *
+         * @param selector {string} The query selector.
+         * @returns {Promise<HTMLElement>}
+         */
         function q(selector) {
             return query(selector);
         }

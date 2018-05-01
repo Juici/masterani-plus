@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.3.1
+// @version      0.3.2
 // @author       Juici
 // @description  Enhancements and additions to Masterani
 // @homepageURL  https://github.com/Juici/masterani-plus
@@ -10,6 +10,7 @@
 // @supportURL   https://github.com/Juici/masterani-plus
 // @include      /^https?:\/\/www\.masterani\.me\/.*/
 // @connect      api.jikan.moe
+// @connect      myanimelist.net
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
