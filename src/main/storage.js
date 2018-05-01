@@ -12,16 +12,6 @@ const storage = {
     },
 
     /**
-     * Set the value of an item in the storage.
-     *
-     * @param {string} key - The key of the item.
-     * @param {string|boolean|number} value - The value of the item.
-     */
-    set(key, value) {
-        GM_setValue(key, value);
-    },
-
-    /**
      * Gets the value of an item in the storage.
      *
      * @param {string} key - The key of the item.
@@ -31,6 +21,16 @@ const storage = {
      */
     get(key, def) {
         return GM_getValue(key, def);
+    },
+
+    /**
+     * Set the value of an item in the storage.
+     *
+     * @param {string} key - The key of the item.
+     * @param {string|boolean|number} value - The value of the item.
+     */
+    set(key, value) {
+        GM_setValue(key, value);
     },
 };
 
