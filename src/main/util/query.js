@@ -1,8 +1,3 @@
-// Internal
-
-/**
- * A pending query with callback.
- */
 class PendingQuery {
     constructor(query, resolve) {
         this.query = query;
@@ -10,9 +5,6 @@ class PendingQuery {
     }
 }
 
-/**
- * A global MutationObserver to resolve pending queries.
- */
 class Observer {
     constructor() {
         this._config = {
@@ -20,25 +12,25 @@ class Observer {
             childList: true,
             subtree: true,
         };
-        this._queries = [];
+        this._pending = [];
         this._observer = new MutationObserver(mutations => this._observe(mutations));
         this._running = false;
     }
 
     _observe(mutations) {
         for (let mut of mutations) {
-            let i = this._queries.length;
+            let i = this._pending.length;
             while (i--) {
-                let pending = this._queries[i];
+                let query = this._pending[i];
 
-                if (mut.type === 'attributes' && mut.target.matches(pending.query)) {
-                    this._queries.slice(i, 1);
-                    pending.resolve(mut.target);
+                if (mut.type === 'attributes' && mut.target.matches(query.query)) {
+                    this._pending.slice(i, 1);
+                    query.resolve(mut.target);
                 } else if (mut.type === 'childList') {
-                    const el = mut.target.querySelector(pending.query);
+                    const el = mut.target.querySelector(query.query);
                     if (el != null) {
-                        this._queries.slice(i, 1);
-                        pending.resolve(el);
+                        this._pending.slice(i, 1);
+                        query.resolve(el);
                     }
                 }
             }
@@ -62,25 +54,23 @@ class Observer {
     }
 
     add(pending) {
-        this._queries.push(pending);
+        this._pending.push(pending);
     }
 }
 
-const observer = new Observer();
-observer.start();
-
-// External
-
-function q(query) {
+function query(selector) {
     return new Promise(resolve => {
-        let el = document.querySelector(query);
+        let el = document.querySelector(selector);
         if (el != null) {
             resolve(el);
         } else {
-            const pending = new PendingQuery(query, resolve);
+            const pending = new PendingQuery(selector, resolve);
             observer.add(pending);
         }
     });
 }
 
-exports.q = q;
+const observer = new Observer();
+observer.start();
+
+module.exports = query;
