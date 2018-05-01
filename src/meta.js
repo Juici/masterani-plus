@@ -20,6 +20,7 @@ const meta = {
         exclude: [],
         connect: [
             'api.jikan.moe',
+            'myanimelist.net'
         ],
     },
     require: [],
