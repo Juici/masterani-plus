@@ -2,7 +2,8 @@ const http = require('../http');
 const info = require('./info');
 const _ = require('../util');
 
-const search = `https://api.jikan.moe/search/anime/${encodeURIComponent(info.anime.title)}`;
+const search = `https://myanimelist.net/anime.php?q=${encodeURIComponent(info.anime.title)}`;
+const findUrl = /<a[^>]*?class="[^"]*?\bhoverinfo_trigger\b[^"]*?"[^>]*?href="([^"]*?)"[^>]*?>/i;
 
 function addLink(url) {
     _.q('.ui.sections.list').then(sections => {
@@ -22,17 +23,14 @@ function requestLink() {
         method: 'GET',
         timeout: 5000,
     }).then(res => new Promise((resolve, reject) => {
-        let result = JSON.parse(res.responseText);
+        const page = res.responseText;
+        const match = findUrl.exec(page);
 
-        if (result.result && result.result[0]) {
-            result = result.result[0];
-
-            if (result.url) {
-                resolve(result.url);
-            }
+        if (match) {
+            resolve(match[1]);
+        } else {
+            reject();
         }
-
-        reject();
     }));
 }
 
