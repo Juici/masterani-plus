@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.2.0
+// @version      0.3.0
 // @author       Juici
 // @description  Enhancements and additions to Masterani
 // @homepageURL  https://github.com/Juici/masterani-plus
@@ -63,118 +63,206 @@
 
     }, { "./info": 2, "./mal-link": 3 }],
     2: [function (require, module, exports) {
-        (function (global) {
-            const regex = /^https?:\/\/www\.masterani\.me\/anime\/info\/((\d+)-.*)[?#]?/i;
+        const regex = /^https?:\/\/www\.masterani\.me\/anime\/info\/((\d+)-.*)[?#]?/i;
 
-            const info = {};
+        const info = {};
 
-            const matches = regex.exec(global.location.href);
-            if (matches) {
-                info.matches = true;
+        const matches = regex.exec(window.location.href);
+        if (matches) {
+            info.matches = true;
 
-                const anime = {};
-                anime.id = matches[2];
-                anime.slug = matches[1];
+            const anime = {};
+            anime.id = matches[2];
+            anime.slug = matches[1];
 
-                let title = global.document.querySelector('meta[property="og:title"]');
-                anime.title = title ? title.content.replace(' - Masterani', '') : '';
+            let title = document.querySelector('meta[property="og:title"]');
+            anime.title = title ? title.content.replace(' - Masterani', '') : '';
 
-                let description = global.document.querySelector('meta[property="og:title"]');
-                anime.description = description ? description : '';
+            let description = document.querySelector('meta[property="og:title"]');
+            anime.description = description ? description : '';
 
-                info.anime = anime;
-            } else {
-                info.matches = false;
-            }
+            info.anime = anime;
+        } else {
+            info.matches = false;
+        }
 
-            module.exports = info;
+        module.exports = info;
 
-        }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
     }, {}],
     3: [function (require, module, exports) {
-        (function (global) {
-            const http = require('../http');
-            const info = require('./info');
+        const http = require('../http');
+        const info = require('./info');
+        const _ = require('../util');
 
-            const search = `https://api.jikan.moe/search/anime/${global.encodeURIComponent(info.anime.title)}`;
+        const search = `https://api.jikan.moe/search/anime/${encodeURIComponent(info.anime.title)}`;
 
-            function addLink(url) {
-                const sections = global.document.querySelector('.ui.sections.list');
-
-                const link = global.document.createElement('a');
+        function addLink(url) {
+            _.q('.ui.sections.list').then(sections => {
+                const link = document.createElement('a');
                 link.className = 'item';
                 link.href = url;
                 link.target = '_blank';
                 link.innerText = 'MyAnimeList';
 
                 sections.appendChild(link);
+            });
+        }
+
+        http.request({
+            url: search,
+            method: 'GET',
+            timeout: 5000,
+        }).then(res => {
+            let result = JSON.parse(res.responseText);
+            result = result.result[0];
+
+            if (document.readyState !== 'loading') {
+                addLink(result.url);
+            } else {
+                document.addEventListener('DOMContentLoaded', () => addLink(result.url));
+            }
+        });
+
+    }, { "../http": 4, "../util": 6, "./info": 2 }],
+    4: [function (require, module, exports) {
+        exports.request = function (url, init) {
+            const opts = {};
+
+            if (typeof url === 'string') {
+                init = init || {};
+            } else if (typeof url === 'object') {
+                init = url;
+                url = init.url || '';
             }
 
-            http.request({
-                url: search,
-                method: 'GET',
-                timeout: 5000,
-            }).then(res => {
-                let result = JSON.parse(res.responseText);
-                result = result.result[0];
+            opts.url = url;
 
-                if (global.document.readyState !== 'loading') {
-                    addLink(result.url);
-                } else {
-                    global.document.addEventListener('DOMContentLoaded', () => addLink(result.url));
-                }
+            opts.method = (init.method || 'GET').toUpperCase();
+            opts.headers = init.headers || {};
+
+            if (init.data) {
+                opts.data = init.data;
+            }
+            if (init.timeout) {
+                opts.timeout = init.timeout;
+            }
+            if (init.username && init.password) {
+                opts.username = init.username;
+                opts.password = init.password;
+            }
+
+            return new Promise((resolve, reject) => {
+                opts.onload = function (res) {
+                    resolve(res);
+                };
+                opts.onabort = opts.onerror = opts.ontimeout = function (res) {
+                    reject(res);
+                };
+                GM_xmlhttpRequest(opts);
             });
+        };
 
-        }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-    }, { "../http": 4, "./info": 2 }],
-    4: [function (require, module, exports) {
-        (function (global) {
-            exports.request = function (url, init) {
-                const opts = {};
-
-                if (typeof url === 'string') {
-                    init = init || {};
-                } else if (typeof url === 'object') {
-                    init = url;
-                    url = init.url || '';
-                }
-
-                opts.url = url;
-
-                opts.method = (init.method || 'GET').toUpperCase();
-                opts.headers = init.headers || {};
-
-                if (init.data) {
-                    opts.data = init.data;
-                }
-                if (init.timeout) {
-                    opts.timeout = init.timeout;
-                }
-                if (init.username && init.password) {
-                    opts.username = init.username;
-                    opts.password = init.password;
-                }
-
-                return new global.Promise((resolve, reject) => {
-                    opts.onload = function (res) {
-                        resolve(res);
-                    };
-                    opts.onabort = opts.onerror = opts.ontimeout = function (res) {
-                        reject(res);
-                    };
-                    GM_xmlhttpRequest(opts);
-                });
-            };
-
-        }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
     }, {}],
     5: [function (require, module, exports) {
+        const start = window.performance.now();
+
         // load modules
         require('./anime-info');
 
+        const end = window.performance.now();
+
         // finished loading
         const info = GM_info.script;
-        console.log(`${info.name} ${info.version} loaded!`);
+        console.log(`${info.name} ${info.version} loaded in ${end - start}ms!`);
 
-    }, { "./anime-info": 1 }]
+    }, { "./anime-info": 1 }],
+    6: [function (require, module, exports) {
+        // Internal
+
+        /**
+         * A pending query with callback.
+         */
+        class PendingQuery {
+            constructor(query, resolve) {
+                this.query = query;
+                this.resolve = resolve;
+            }
+        }
+
+        /**
+         * A global MutationObserver to resolve pending queries.
+         */
+        class Observer {
+            constructor() {
+                this._config = {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                };
+                this._queries = [];
+                this._observer = new MutationObserver(mutations => this._observe(mutations));
+                this._running = false;
+            }
+
+            _observe(mutations) {
+                for (let mut of mutations) {
+                    let i = this._queries.length;
+                    while (i--) {
+                        let pending = this._queries[i];
+
+                        if (mut.type === 'attributes' && mut.target.matches(pending.query)) {
+                            this._queries.slice(i, 1);
+                            pending.resolve(mut.target);
+                        } else if (mut.type === 'childList') {
+                            const el = mut.target.querySelector(pending.query);
+                            if (el != null) {
+                                this._queries.slice(i, 1);
+                                pending.resolve(el);
+                            }
+                        }
+                    }
+                }
+            }
+
+            start() {
+                if (this._running) {
+                    return;
+                }
+                this._observer.observe(document.documentElement, this._config);
+                this._running = true;
+            }
+
+            stop() {
+                if (!this._running) {
+                    return;
+                }
+                this._observer.disconnect();
+                this._running = false;
+            }
+
+            add(pending) {
+                this._queries.push(pending);
+            }
+        }
+
+        const observer = new Observer();
+        observer.start();
+
+        // External
+
+        function q(query) {
+            return new Promise(resolve => {
+                let el = document.querySelector(query);
+                if (el != null) {
+                    resolve(el);
+                } else {
+                    const pending = new PendingQuery(query, resolve);
+                    observer.add(pending);
+                }
+            });
+        }
+
+        exports.q = q;
+
+    }, {}]
 }, {}, [5]);
