@@ -2,7 +2,7 @@
 
 const meta = {
     name: 'Masterani+',
-    version: '0.3.2',
+    version: '0.4.0',
     author: 'Juici',
     description: 'Enhancements and additions to Masterani',
     icon: null,
@@ -20,7 +20,7 @@ const meta = {
         exclude: [],
         connect: [
             'api.jikan.moe',
-            'myanimelist.net'
+            'myanimelist.net',
         ],
     },
     require: [],
@@ -28,6 +28,9 @@ const meta = {
     runtime: 'document-start',
     grant: [
         'GM_xmlhttpRequest',
+        'GM_deleteValue',
+        'GM_getValue',
+        'GM_setValue',
     ],
     noframes: false,
     unwrap: false,

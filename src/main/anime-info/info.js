@@ -14,7 +14,7 @@ if (matches) {
     anime.title = title ? title.content.replace(' - Masterani', '') : '';
 
     let description = document.querySelector('meta[property="og:title"]');
-    anime.description = description ? description : '';
+    anime.description = description ? description.context : '';
 
     info.anime = anime;
 } else {
