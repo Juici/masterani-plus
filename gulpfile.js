@@ -20,7 +20,7 @@ global.paths = paths;
 
 const { lint, test } = require('./tasks/test');
 const clean = require('./tasks/clean');
-const js = require('./tasks/compile/index');
+const js = require('./tasks/compile');
 
 exports.lint = lint;
 exports.test = test;
