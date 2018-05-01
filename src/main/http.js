@@ -24,7 +24,7 @@ exports.request = function (url, init) {
         opts.password = init.password;
     }
 
-    return new global.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         opts.onload = function (res) {
             resolve(res);
         };
