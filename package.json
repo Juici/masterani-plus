@@ -1,6 +1,6 @@
 {
   "name": "masterani-plus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Gulp build system for Masterani+",
   "scripts": {
     "test": "gulp test",
