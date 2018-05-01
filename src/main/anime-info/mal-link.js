@@ -1,18 +1,19 @@
 const http = require('../http');
 const info = require('./info');
+const _ = require('../util');
 
-const search = `https://api.jikan.moe/search/anime/${global.encodeURIComponent(info.anime.title)}`;
+const search = `https://api.jikan.moe/search/anime/${encodeURIComponent(info.anime.title)}`;
 
 function addLink(url) {
-    const sections = global.document.querySelector('.ui.sections.list');
+    _.q('.ui.sections.list').then(sections => {
+        const link = document.createElement('a');
+        link.className = 'item';
+        link.href = url;
+        link.target = '_blank';
+        link.innerText = 'MyAnimeList';
 
-    const link = global.document.createElement('a');
-    link.className = 'item';
-    link.href = url;
-    link.target = '_blank';
-    link.innerText = 'MyAnimeList';
-
-    sections.appendChild(link);
+        sections.appendChild(link);
+    });
 }
 
 http.request({
@@ -23,9 +24,9 @@ http.request({
     let result = JSON.parse(res.responseText);
     result = result.result[0];
 
-    if (global.document.readyState !== 'loading') {
+    if (document.readyState !== 'loading') {
         addLink(result.url);
     } else {
-        global.document.addEventListener('DOMContentLoaded', () => addLink(result.url));
+        document.addEventListener('DOMContentLoaded', () => addLink(result.url));
     }
 });
