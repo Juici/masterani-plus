@@ -1,5 +1,7 @@
 'use strict';
 
+const pkg = require('../../package.json');
+
 function hashUrl(url, hashes) {
     let hashString = '';
 
@@ -25,6 +27,9 @@ function buildEntries(meta) {
     entries.push({ 'version': meta.version });
     entries.push({ 'author': meta.author });
     entries.push({ 'description': meta.description });
+
+    entries.push({ 'copyright': `${new Date().getFullYear()}, ${meta.author} (${meta.url.homepage})` });
+    entries.push({ 'license': `${pkg.license}; ${meta.url.homepage}/raw/master/LICENSE` });
 
     if (typeof meta.icon === 'string' && meta.icon) {
         entries.push({ 'icon': meta.icon });

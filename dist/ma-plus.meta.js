@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.4.0
+// @version      0.4.1
 // @author       Juici
 // @description  Enhancements and additions to Masterani
+// @copyright    2018, Juici (https://github.com/Juici/masterani-plus)
+// @license      MIT; https://github.com/Juici/masterani-plus/raw/master/LICENSE
 // @homepageURL  https://github.com/Juici/masterani-plus
 // @updateURL    https://github.com/Juici/masterani-plus/raw/master/dist/ma-plus.meta.js
 // @downloadURL  https://github.com/Juici/masterani-plus/raw/master/dist/ma-plus.user.js
