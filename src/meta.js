@@ -2,7 +2,7 @@
 
 const meta = {
     name: 'Masterani+',
-    version: '0.4.0',
+    version: '0.4.1',
     author: 'Juici',
     description: 'Enhancements and additions to Masterani',
     icon: null,
