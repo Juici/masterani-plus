@@ -18,7 +18,7 @@ class Observer {
     }
 
     _observe(mutations) {
-        for (let mut of mutations) {
+        for (const mut of mutations) {
             let i = this._pending.length;
             while (i--) {
                 let query = this._pending[i];
