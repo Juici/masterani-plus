@@ -2,6 +2,7 @@ const start = window.performance.now();
 
 // load modules
 require('./anime-info');
+require('./cleaner');
 
 const end = window.performance.now();
 
