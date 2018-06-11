@@ -31,6 +31,13 @@ class Observer {
                         if (typeof el.matches === 'function' && el.matches(watcher.query)) {
                             watcher.cb(el);
                         }
+
+                        if (typeof el.querySelectorAll === 'function') {
+                            const children = el.querySelectorAll(watcher.query);
+                            for (const child of children) {
+                                watcher.cb(child);
+                            }
+                        }
                     }
                 }
             }
