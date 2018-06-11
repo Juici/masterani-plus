@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Masterani+
 // @namespace    https://github.com/Juici/masterani-plus
-// @version      0.4.1
+// @version      0.5.0
 // @author       Juici
 // @description  Enhancements and additions to Masterani
 // @copyright    2018, Juici (https://github.com/Juici/masterani-plus)
@@ -156,8 +156,27 @@
             });
         }
 
-    }, { "../http": 4, "../storage": 6, "../util": 7, "./info": 2 }],
+    }, { "../http": 5, "../storage": 7, "../util": 8, "./info": 2 }],
     4: [function (require, module, exports) {
+        const _ = require('./util');
+
+        const blacklist = [
+            '.campaign',
+        ];
+
+        for (const sel of blacklist) {
+            _.qa(sel, (el) => {
+                const parent = el.parentElement;
+                if (parent != null && parent.childElementCount === 1) {
+                    parent.remove();
+                } else {
+                    el.remove();
+                }
+            });
+        }
+
+    }, { "./util": 8 }],
+    5: [function (require, module, exports) {
         exports.request = function (url, init) {
             const opts = {};
 
@@ -196,11 +215,12 @@
         };
 
     }, {}],
-    5: [function (require, module, exports) {
+    6: [function (require, module, exports) {
         const start = window.performance.now();
 
         // load modules
         require('./anime-info');
+        require('./cleaner');
 
         const end = window.performance.now();
 
@@ -208,8 +228,8 @@
         const info = GM_info.script;
         console.log(`${info.name} ${info.version} loaded in ${end - start}ms!`);
 
-    }, { "./anime-info": 1 }],
-    6: [function (require, module, exports) {
+    }, { "./anime-info": 1, "./cleaner": 4 }],
+    7: [function (require, module, exports) {
         /**
          * A utility module for interfacing with the userscript storage.
          */
@@ -249,8 +269,9 @@
         module.exports = storage;
 
     }, {}],
-    7: [function (require, module, exports) {
+    8: [function (require, module, exports) {
         const query = require('./query');
+        const queryAll = require('./query-all');
 
         /**
          * Query the document with the given selector.
@@ -262,10 +283,105 @@
             return query(selector);
         }
 
-        exports.q = q;
+        /**
+         * Query the document with the given selector and perform the callback function on any new element
+         * matches.
+         *
+         * @param {string} selector - The query selector.
+         * @param {function(HTMLElement)} callback - The callback function.
+         */
+        function qa(selector, callback) {
+            queryAll(selector, callback);
+        }
 
-    }, { "./query": 8 }],
-    8: [function (require, module, exports) {
+        exports.q = q;
+        exports.qa = qa;
+
+    }, { "./query": 10, "./query-all": 9 }],
+    9: [function (require, module, exports) {
+        class Watcher {
+            constructor(query, cb) {
+                this.query = query;
+                this.cb = cb;
+            }
+        }
+
+        class Observer {
+            constructor() {
+                this._config = {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                };
+                this._watchers = [];
+                this._observer = new MutationObserver(mutations => this._observe(mutations));
+                this._running = false;
+            }
+
+            _observe(mutations) {
+                for (const mut of mutations) {
+                    for (const watcher of this._watchers) {
+                        if (mut.type === 'attributes' && mut.target.matches(watcher.query)) {
+                            watcher.cb(mut.target);
+                        } else if (mut.type === 'childList') {
+                            if (mut.addedNodes == null) {
+                                continue;
+                            }
+
+                            for (const el of mut.addedNodes) {
+                                if (typeof el.matches === 'function' && el.matches(watcher.query)) {
+                                    watcher.cb(el);
+                                }
+
+                                if (typeof el.querySelectorAll === 'function') {
+                                    const children = el.querySelectorAll(watcher.query);
+                                    for (const child of children) {
+                                        watcher.cb(child);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            start() {
+                if (this._running) {
+                    return;
+                }
+                this._observer.observe(document.documentElement, this._config);
+                this._running = true;
+            }
+
+            stop() {
+                if (!this._running) {
+                    return;
+                }
+                this._observer.disconnect();
+                this._running = false;
+            }
+
+            add(watcher) {
+                this._watchers.push(watcher);
+            }
+        }
+
+        function queryAll(selector, callback) {
+            const els = document.querySelectorAll(selector);
+            for (const el of els) {
+                callback(el);
+            }
+
+            observer.add(new Watcher(selector, callback));
+        }
+
+        const observer = new Observer();
+        observer.start();
+
+        module.exports = queryAll;
+
+    }, {}],
+    10: [function (require, module, exports) {
         class PendingQuery {
             constructor(query, resolve) {
                 this.query = query;
@@ -286,7 +402,7 @@
             }
 
             _observe(mutations) {
-                for (let mut of mutations) {
+                for (const mut of mutations) {
                     let i = this._pending.length;
                     while (i--) {
                         let query = this._pending[i];
@@ -344,4 +460,4 @@
         module.exports = query;
 
     }, {}]
-}, {}, [5]);
+}, {}, [6]);
